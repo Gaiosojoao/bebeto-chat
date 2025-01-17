@@ -25,7 +25,7 @@ for role, content in st.session_state.messages:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Caixa de entrada para mensagens do usuário
-if question := st.chat_input("Digite '1' para carregar um site, '2' para carregar um PDF, '3' para carregar um vídeo do YouTube, ou faça uma pergunta!"):
+if question := st.chat_input("Digite '1' para carregar um site, '2' para carregar um PDF, '3' para carregar um vídeo do YouTube!"):
     with st.chat_message("user"):
         st.markdown(question)
     st.session_state.messages.append(("user", question))  # Adiciona mensagem do usuário ao histórico
