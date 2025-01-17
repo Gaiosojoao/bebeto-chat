@@ -29,7 +29,7 @@ def carrega_pdf(file):
 def carrega_youtube(url):
     video_id = url.split("v=")[-1]
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt'], ['Português-Brasil'])
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt'], ['Portugues'])
     except NoTranscriptFound:
         transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt'], ['pt-PT'])
     documento = ' '.join([item['text'] for item in transcript])
