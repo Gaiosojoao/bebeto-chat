@@ -34,13 +34,13 @@ if question := st.chat_input("Digite '1' para carregar um site, '2' para carrega
     if st.session_state.comando == '':
         if question == '1':
             st.session_state.comando = 'site'
-            st.session_state.messages.append(("assistant", "Digite a URL do site que deseja carregar:"))
+            st.session_state.messages.append(("assistant", "Digite a URL do site aqui:"))
         elif question == '2':
             st.session_state.comando = 'pdf'
             st.session_state.messages.append(("assistant", "Faça o upload do documento PDF:"))
         elif question == '3':
             st.session_state.comando = 'youtube'
-            st.session_state.messages.append(("assistant", "Digite a URL do vídeo do YouTube:"))
+            st.session_state.messages.append(("assistant", "Digite a URL do vídeo do YouTube aqui:"))
         else:
             # Resposta do chatbot para perguntas gerais
             with st.chat_message("assistant"):
