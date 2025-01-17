@@ -3,6 +3,7 @@ from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import WebBaseLoader
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound
+import PyPDF2
 
 api_key = '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'
 os.environ['GROQ_API_KEY'] = api_key
@@ -17,10 +18,13 @@ def carrega_site(url):
         documento += doc.page_content
     return documento
 
-def carrega_pdf():
-    # Função para carregar conteúdo de um PDF
-    # Substitua este código pelo código real para carregar o conteúdo do PDF
-    return "Conteúdo do PDF"
+def carrega_pdf(file):
+    reader = PyPDF2.PdfReader(file)
+    documento = ''
+    for page_num in range(len(reader.pages)):  # Usa len(reader.pages) no lugar de reader.numPages
+        page = reader.pages[page_num]  # Usa reader.pages[page_num] no lugar de getPage(page_num)
+        documento += page.extract_text()  # Mantém o método extract_text()
+    return documento
 
 def carrega_youtube(url):
     video_id = url.split("v=")[-1]
