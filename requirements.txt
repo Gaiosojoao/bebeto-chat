@@ -1,8 +1,6 @@
 langchain
 streamlit
 langchain_groq
-langchain.prompt
 Pypdf
 youtube-transcript-api
 bs4
-langchain.community
