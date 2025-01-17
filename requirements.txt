@@ -4,3 +4,4 @@ langchain_groq
 Pypdf
 youtube-transcript-api
 bs4
+langchain-community
