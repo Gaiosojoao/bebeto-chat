@@ -8,8 +8,8 @@ Este projeto é uma aplicação de chatbot construída com Streamlit. O chatbot 
 
 O projeto possui os seguintes arquivos:
 
-- `src/main_chatbot.py`: Contém a lógica principal do chatbot, incluindo a função `resposta_bot` que processa as mensagens do usuário.
-- `src/app.py`: Ponto de entrada da aplicação Streamlit, que configura a interface do usuário para interação com o chatbot.
+- `src/main_bebeto2.py`: Contém a lógica principal do chatbot, incluindo a função `resposta_bot` que processa as mensagens do usuário.
+- `src/BebetoBot.py`: Ponto de entrada da aplicação Streamlit, que configura a interface do usuário para interação com o chatbot.
 - `requirements.txt`: Lista as dependências necessárias para o projeto.
 
 ## Instalação
@@ -25,7 +25,7 @@ pip install -r requirements.txt
 Para executar a aplicação Streamlit, utilize o seguinte comando:
 
 ```
-streamlit run src/app.py
+streamlit run src/BebetoBot.py
 ```
 
 Após executar o comando, a aplicação estará disponível em seu navegador, permitindo que você interaja com o chatbot.
