@@ -51,15 +51,22 @@ if question := st.chat_input("Digite '1' para carregar um site, '2' para carrega
                 st.session_state.messages.append(("assistant", answer))
     else:
         # Processar comandos específicos
-        if st.session_state.comando == 'site':
+        if st.session_state.comando == 'site' and question.startswith("http"):
             st.session_state.documento = carrega_site(question)
             st.session_state.messages.append(("assistant", "Site carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
-        elif st.session_state.comando == 'youtube':
+            st.session_state.comando = ''  # Reseta o comando após o processamento
+        elif st.session_state.comando == 'youtube' and question.startswith("http"):
             st.session_state.documento = carrega_youtube(question)
             st.session_state.messages.append(("assistant", "Vídeo do YouTube carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
+            st.session_state.comando = ''  # Reseta o comando após o processamento
         elif st.session_state.comando == 'pdf':
             st.session_state.messages.append(("assistant", "Por favor, faça o upload do documento PDF utilizando o botão abaixo."))
-        st.session_state.comando = ''  # Reseta o comando após o processamento
+        else:
+            # Caso o comando esteja definido, mas a entrada não seja válida
+            if st.session_state.comando == 'site':
+                st.session_state.messages.append(("assistant", "Por favor, insira uma URL válida do site."))
+            elif st.session_state.comando == 'youtube':
+                st.session_state.messages.append(("assistant", "Por favor, insira uma URL válida do vídeo do YouTube."))
 
 # Gerenciar upload de PDF
 if st.session_state.comando == 'pdf':
