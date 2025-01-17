@@ -31,7 +31,7 @@ def carrega_youtube(url):
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt'])
     except NoTranscriptFound:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt'], ['pt-PT'])
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['pt', 'pt-PT'])
     documento = ' '.join([item['text'] for item in transcript])
     return documento
 
