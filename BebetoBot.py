@@ -76,7 +76,7 @@ if st.session_state.comando == 'site':
         st.session_state.messages.append(("assistant", "Site carregado com sucesso!"))
 
 if st.session_state.comando == 'youtube':
-    if url := st.chat_input("Digite a URL do vídeo do YouTube:"):
+    if url := st.chat_message("user"):
         st.session_state.documento = carrega_youtube(url)
         st.session_state.comando = ''
         st.session_state.messages.append(("assistant", "Vídeo do YouTube carregado com sucesso!"))
