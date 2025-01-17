@@ -1,5 +1,5 @@
 import os
-from langchain_groq import ChatGroq
+from langchain-groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.document_loaders import WebBaseLoader
 from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound
