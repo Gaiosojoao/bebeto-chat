@@ -1,156 +1,108 @@
-import tempfile
 import streamlit as st
-from langchain.memory import ConversationBufferMemory
+from main_bebeto2 import carrega_site, carrega_pdf, carrega_youtube, resposta_bot
 
-from langchain_openai import ChatOpenAI
-from langchain_groq import ChatGroq
-from langchain.prompts import ChatPromptTemplate
+# Título do aplicativo Streamlit
+st.cache_data.clear()
+st.cache_resource.clear()
 
-from loaders import *
+# Adicionar um título estilizado
+st.markdown("<h1 style='text-align:center; color: #6a0dad;'>BebetoBot 🤙🏻</h1>", unsafe_allow_html=True)
 
-TIPOS_ARQUIVOS_VALIDDOS = [ 
-    'Site', 'Youtube', 'Pdf', 'Csv', 'Txt'
-]
+# Configuração inicial do estado da sessão
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-CONFIG_MODELOS = {'Groq': 
-                        {'modelos': ['llama-3.3-70b-versatile', 'gemma2-9b-it', 'mixtral-8x7b-32768'],
-                         'chat': ChatGroq},
-                  'OpenAI': 
-                        {'modelos': ['GPT-4o-mini', 'GPT-4o', 'o1 and o1-mini'],
-                         'chat': ChatOpenAI}}
+if "documento" not in st.session_state:
+    st.session_state.documento = ""
 
-MEMORIA = ConversationBufferMemory()
+if "comando" not in st.session_state:
+    st.session_state.comando = ""
 
-def carrega_arquivos(tipo_arquivo, arquivo):
-    if tipo_arquivo == 'Site':
-        arquivo = carrega_site(arquivo)
-    if tipo_arquivo == 'Youtube':
-        arquivo = carrega_youtube(arquivo)
-    if tipo_arquivo == 'Pdf':
-        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp:
-            temp.write(arquivo.read())
-            nome_temp = temp.name
-        arquivo = carrega_pdf(nome_temp)
-    if tipo_arquivo == 'Csv':
-        with tempfile.NamedTemporaryFile(suffix='.csv', delete=False) as temp:
-            temp.write(arquivo.read())
-            nome_temp = temp.name
-        arquivo = carrega_csv(nome_temp)
-    if tipo_arquivo == 'Txt':
-        with tempfile.NamedTemporaryFile(suffix='.txt', delete=False) as temp:
-            temp.write(arquivo.read())
-            nome_temp = temp.name
-        arquivo = carrega_txt(nome_temp)
-    return arquivo
+# Exibir mensagens do histórico de conversação
+st.markdown('<div class="content">', unsafe_allow_html=True)
+for role, content in st.session_state.messages:
+    with st.chat_message(role):
+        st.markdown(content)
+st.markdown('</div>', unsafe_allow_html=True)
 
-def carrega_modelo(provedor, modelo, api_key, tipo_arquivo, arquivo):
-    
-    arquivo = carrega_arquivos(tipo_arquivo, arquivo)
-
-    system_message = '''Você é um assistente amigável chamado Bebeto.
-    Você possui acesso às seguintes informações vindas 
-    de um documento {}: 
-
-    ####
-    {}
-    ####
-
-    Utilize as informações fornecidas para basear as suas respostas.
-
-    Sempre que houver $ na sua saída, substita por S.
-
-    Se a informação do documento for algo como "Just a moment...Enable JavaScript and cookies to continue" 
-    sugira ao usuário carregar novamente o Oráculo!'''.format(tipo_arquivo, arquivo)
-    template = ChatPromptTemplate.from_messages([
-        ('system', system_message),
-        ('placeholder', '{chat_history}'),
-        ('user', '{input}')
-    ])
-
-    chat = CONFIG_MODELOS[provedor]['chat'](model=modelo, api_key=api_key)
-    chain = template | chat
-
-    st.session_state['chain'] = chain
-
-def pagina_chat():
-    st.header('🤖 Bem-vindo ao Bebeto', divider=True)
-
-    chain = st.session_state.get('chain')
-    if chain is None:
-        st.error('Carregue o Bebeto')
-        st.stop()
-    memoria = st.session_state.get('memoria', MEMORIA)
-    for mensagem in memoria.buffer_as_messages:
-        chat = st.chat_message(mensagem.type)
-        chat.markdown(mensagem.content)
-        
-    input_usuario = st.chat_input('Fale com o Bebeto!')
-    if input_usuario:
-        chat = st.chat_message('human')
-        chat.markdown(input_usuario)
-
-        chat = st.chat_message('ai')
-        resposta = chat.write_stream(chain.stream({
-            'input': input_usuario,
-            'chat_history': memoria.buffer_as_messages
-            }))
-
-        memoria.chat_memory.add_user_message(input_usuario)
-        memoria.chat_memory.add_ai_message(resposta)
-        st.session_state['memoria'] = memoria
-
-def sidebar():
-    tabs = st.tabs(['Upload de Arquivos', 'Seleção de Modelos'])
-    with tabs[0]:
-        tipo_arquivo = st.selectbox('Tipo de Arquivo', TIPOS_ARQUIVOS_VALIDDOS)
-        if tipo_arquivo == 'Site':
-            arquivo = st.text_input('Digite a URL do site:')
-        if tipo_arquivo == 'Youtube':
-            arquivo = st.text_input('Digite a URL do video:')
-        if tipo_arquivo == 'Pdf':
-           arquivo = st.file_uploader('Faça o upload do arquivo pdf:', type=['pdf'])
-        if tipo_arquivo == 'Csv':
-           arquivo = st.file_uploader('Faça o upload do arquivo csv:', type=['.csv'])
-        if tipo_arquivo == 'Txt':
-           arquivo = st.file_uploader('Faça o upload do arquivo txt:', type=['.txt'])
-    with tabs[1]:
-        provedor = st.selectbox('Selecione o provedor do modelo', CONFIG_MODELOS.keys())
-        modelo = st.selectbox('Selecione o modelo', CONFIG_MODELOS[provedor]['modelos'])
-        api_key  = st.text_input(
-            f'Digite sua API key para o provedor selecionado {provedor}',
-            value = st.session_state.get(f'api_key_{provedor}'))
-
-        st.session_state[f'api_key_{provedor}'] = api_key
-
-    # Botão estilizado
-    st.markdown("""
+# Estilo CSS para modernizar o design
+st.markdown("""
     <style>
-    .stButton>button {
-        background-color: #6a0dad; /* Roxo */
-        color: white;
-        padding: 12px 24px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-    }
-    .stButton>button:hover {
-        background-color: #9b30b6;
-    }
+        .stTextInput>div>div>input {
+            border-radius: 12px;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #6a0dad;
+        }
+        .stButton>button {
+            background-color: #6a0dad;
+            color: white;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+        }
+        .stButton>button:hover {
+            background-color: #5a0aa1;
+        }
+        .content {
+            margin-bottom: 20px;
+        }
     </style>
-    """, unsafe_allow_html=True)
-    
-    if st.button('Inicializar Bebeto', use_container_width=True):
-        carrega_modelo(provedor, modelo, api_key, tipo_arquivo, arquivo) 
+""", unsafe_allow_html=True)
 
-    if st.button('Apagar Histórico de Conversa', use_container_width=True):
-        st.session_state['memoria'] = MEMORIA
+# Caixa de entrada para mensagens do usuário
+if question := st.chat_input("Digite '1' para carregar um site, '2' para carregar um PDF, '3' para carregar um vídeo do YouTube!"):
+    with st.chat_message("user"):
+        st.markdown(question)
+    st.session_state.messages.append(("user", question))  # Adiciona mensagem do usuário ao histórico
 
-def main(): 
-    with st.sidebar:
-        sidebar()
-    pagina_chat()
+    # Processar comando inicial ou interações com base no estado do comando
+    if st.session_state.comando == '':
+        if question == '1':
+            st.session_state.comando = 'site'
+            st.session_state.messages.append(("assistant", "Digite a URL do site aqui:"))
+        elif question == '2':
+            st.session_state.comando = 'pdf'
+            st.session_state.messages.append(("assistant", "Faça o upload do documento PDF:"))
+        elif question == '3':
+            st.session_state.comando = 'youtube'
+            st.session_state.messages.append(("assistant", "Digite a URL do vídeo do YouTube aqui:"))
+        else:
+            # Resposta do chatbot para perguntas gerais
+            with st.chat_message("assistant"):
+                message_placeholder = st.empty()
+                with st.spinner("Determinando a melhor resposta possível..."):
+                    answer = resposta_bot(st.session_state.messages, st.session_state.documento)
+                    message_placeholder.markdown(f"{answer}")
+                st.session_state.messages.append(("assistant", answer))
+    else:
+        # Processar comandos específicos
+        if st.session_state.comando == 'site' and question.startswith("http"):
+            st.session_state.documento = carrega_site(question)
+            st.session_state.messages.append(("assistant", "Site carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
+            st.session_state.comando = ''  # Reseta o comando após o processamento
+        elif st.session_state.comando == 'youtube' and question.startswith("http"):
+            st.session_state.documento = carrega_youtube(question)
+            st.session_state.messages.append(("assistant", "Vídeo do YouTube carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
+            st.session_state.comando = ''  # Reseta o comando após o processamento
+        elif st.session_state.comando == 'pdf':
+            st.session_state.messages.append(("assistant", "Por favor, faça o upload do documento PDF utilizando o botão abaixo."))
+        else:
+            # Caso o comando esteja definido, mas a entrada não seja válida
+            if st.session_state.comando == 'site':
+                st.session_state.messages.append(("assistant", "Por favor, insira uma URL válida do site."))
+            elif st.session_state.comando == 'youtube':
+                st.session_state.messages.append(("assistant", "Por favor, insira uma URL válida do vídeo do YouTube."))
 
-if __name__ == '__main__':
-    main()
+# Gerenciar upload de PDF
+if st.session_state.comando == 'pdf':
+    uploaded_file = st.file_uploader("Escolha um arquivo PDF", type="pdf")
+    if uploaded_file is not None:
+        st.session_state.documento = carrega_pdf(uploaded_file)
+        st.session_state.messages.append(("assistant", "PDF carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
+        st.session_state.comando = ''  # Reseta o comando
 
+# Adicionar um botão de envio roxo
+if st.button("Enviar", use_container_width=True):
+    st.session_state.messages.append(("user", question))
