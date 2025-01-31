@@ -5,8 +5,7 @@ from main_bebeto2 import carrega_site, carrega_pdf, carrega_youtube, resposta_bo
 st.cache_data.clear()
 st.cache_resource.clear()
 
-# Adicionar um título estilizado
-st.markdown("<h1 style='text-align:center; color: #6a0dad;'>BebetoBot 🤙🏻</h1>", unsafe_allow_html=True)
+st.title(f""":rainbow[BebetoBot 🤙🏻]""")
 
 # Configuração inicial do estado da sessão
 if "messages" not in st.session_state:
@@ -24,32 +23,6 @@ for role, content in st.session_state.messages:
     with st.chat_message(role):
         st.markdown(content)
 st.markdown('</div>', unsafe_allow_html=True)
-
-# Estilo CSS para modernizar o design
-st.markdown("""
-    <style>
-        .stTextInput>div>div>input {
-            border-radius: 12px;
-            padding: 10px;
-            font-size: 16px;
-            border: 2px solid #6a0dad;
-        }
-        .stButton>button {
-            background-color: #6a0dad;
-            color: white;
-            border-radius: 12px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-        }
-        .stButton>button:hover {
-            background-color: #5a0aa1;
-        }
-        .content {
-            margin-bottom: 20px;
-        }
-    </style>
-""", unsafe_allow_html=True)
 
 # Caixa de entrada para mensagens do usuário
 if question := st.chat_input("Digite '1' para carregar um site, '2' para carregar um PDF, '3' para carregar um vídeo do YouTube!"):
@@ -102,7 +75,3 @@ if st.session_state.comando == 'pdf':
         st.session_state.documento = carrega_pdf(uploaded_file)
         st.session_state.messages.append(("assistant", "PDF carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
         st.session_state.comando = ''  # Reseta o comando
-
-# Adicionar um botão de envio roxo
-if st.button("Enviar", use_container_width=True):
-    st.session_state.messages.append(("user", question))
