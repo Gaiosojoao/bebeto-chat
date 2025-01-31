@@ -75,3 +75,4 @@ if st.session_state.comando == 'pdf':
         st.session_state.documento = carrega_pdf(uploaded_file)
         st.session_state.messages.append(("assistant", "PDF carregado com sucesso! Você pode fazer perguntas sobre ele agora."))
         st.session_state.comando = ''  # Reseta o comando
+        st.session_state.comando = ''  # Reseta o comando
